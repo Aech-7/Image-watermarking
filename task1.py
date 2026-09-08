@@ -57,12 +57,28 @@ def svd_decomposition(M: np.ndarray) -> tuple:
     idx = np.argsort(eigenvalues)[::-1]                 #Gives the indices of the eigenvalues in descending order
     eigenvalues = eigenvalues[idx]
     eigenvectors = eigenvectors[:, idx]
-    sigma = np.sqrt(np.maximum(eigenvalues, 0))         # MM^T is positive semi-definite, so eigenvalues should be non-negative.A check if there are numerical errors that gives us really small negative eigenvalues, we set them to 0 before taking the square root.
-    print("sigma shape:", sigma.shape)                                  #Just a check to see if the shape of sigma is correct
+    sigma = np.sqrt(np.maximum(eigenvalues, 0))
+    sigma = np.where(sigma <= 1e-9, 0, sigma)          #Replace almost zero singular values with 0
+    print("sigma shape:", sigma.shape)                  #Just a check to see if the shape of sigma is correct
     print("minimum sigma:", sigma.min())                # To check if we have almost zero singular values
-    U = eigenvectors
-    Vt = U.T @ M / sigma[:, None]                                # Vt = sigma^-1 * U^T * M
-               
+    U = eigenvectors                             
+    A = U.T @ M
+    Vt = np.zeros((len(sigma), M.shape[1]), dtype=M.dtype)       # Vt = sigma^-1 * U^T * M
+    nonzero = sigma > 0
+    Vt[nonzero, :] = A[nonzero, :] / sigma[nonzero, None]        # Only caclulate Vt for non-zero singular values to avoid division by zero
+
+    for i in range(len(sigma)):
+
+        if sigma[i] == 0:  # Skip the zero singular values
+            continue
+
+        rhs = sigma[i] * U[:, i]
+        lhs = M @ Vt[i, :].T
+
+        if np.dot(lhs, rhs) < 0:  # If the dot product is negative, flip the sign of U and Vt
+            U[:, i] *= -1
+            Vt[i, :] *= -1
+
     return U, sigma, Vt                    
 
 def add_watermark_single_channel(cover_image: np.ndarray, watermark: np.ndarray, alpha: float) -> np.ndarray:
@@ -143,7 +159,11 @@ def add_watermark_rgb(cover_image: np.ndarray, watermark: np.ndarray, alpha: flo
             Watermarked Image
         """
 
-    watermarked_image = np.zeros_like(cover_image) # comment this line and write your code for the function
+    red_watermarked = add_watermark_single_channel(cover_image[:, :, 0], watermark[:, :, 0], alpha)
+    green_watermarked = add_watermark_single_channel(cover_image[:, :, 1], watermark[:, :, 1], alpha)
+    blue_watermarked = add_watermark_single_channel(cover_image[:, :, 2], watermark[:, :, 2], alpha)
+    watermarked_image = np.stack((red_watermarked, green_watermarked, blue_watermarked), axis=2)
+
     return watermarked_image
 
 def recover_watermark_rgb(original_image: np.ndarray, watermarked_image: np.ndarray, watermark: np.ndarray, alpha: float) -> np.ndarray:
@@ -165,8 +185,11 @@ def recover_watermark_rgb(original_image: np.ndarray, watermarked_image: np.ndar
             Recovered watermark
         """
 
-    
-    recovered_watermark = np.zeros_like(watermark) # comment this line and write your code for the function
+    recovered_red = recover_watermark(original_image[:, :, 0], watermarked_image[:, :, 0], watermark[:, :, 0], alpha)
+    recovered_green = recover_watermark(original_image[:, :, 1], watermarked_image[:, :, 1], watermark[:, :, 1], alpha)
+    recovered_blue = recover_watermark(original_image[:, :, 2], watermarked_image[:, :, 2], watermark[:, :, 2], alpha)
+
+    recovered_watermark = np.stack((recovered_red, recovered_green, recovered_blue), axis=2)
     return recovered_watermark
 
 
@@ -188,8 +211,8 @@ if __name__ == "__main__":
         # Apply watermarking to the image and recover the watermark from the watermarked image
         # ###############################################
         # Comment these lines and write your code here
-        watermarked_image_rgb = ...
-        recovered_rgb = ...
+        watermarked_image_rgb = add_watermark_rgb(image, watermark_rgb, alpha=0.1)
+        recovered_rgb = recover_watermark_rgb(image, watermarked_image_rgb, watermark_rgb, alpha=0.1)
         # ###############################################
 
         watermarked_images_rgb.append(watermarked_image_rgb)
