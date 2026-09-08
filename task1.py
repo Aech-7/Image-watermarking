@@ -59,8 +59,8 @@ def svd_decomposition(M: np.ndarray) -> tuple:
     eigenvectors = eigenvectors[:, idx]
     sigma = np.sqrt(np.maximum(eigenvalues, 0))
     sigma = np.where(sigma <= 1e-9, 0, sigma)          #Replace almost zero singular values with 0
-    print("sigma shape:", sigma.shape)                  #Just a check to see if the shape of sigma is correct
-    print("minimum sigma:", sigma.min())                # To check if we have almost zero singular values
+    # print("sigma shape:", sigma.shape)                  #Just a check to see if the shape of sigma is correct
+    # print("minimum sigma:", sigma.min())                # To check if we have almost zero singular values
     U = eigenvectors                             
     A = U.T @ M
     Vt = np.zeros((len(sigma), M.shape[1]), dtype=M.dtype)       # Vt = sigma^-1 * U^T * M
@@ -104,7 +104,7 @@ def add_watermark_single_channel(cover_image: np.ndarray, watermark: np.ndarray,
     sigma_w = sigma + alpha * sigma_q                           #Gives vector of singular values of the watermarked image
     Sigma_w = np.diag(sigma_w)                                  #Makes a diagonal matrix
     watermarked_image = U @ Sigma_w @ Vt
-    print("watermarked_image shape:", watermarked_image.shape)  # Just a check shape
+    # print("watermarked_image shape:", watermarked_image.shape)  # Just a check shape
     watermarked_image = np.clip(watermarked_image, 0, 1)        # Ensure pixel values are in [0, 1]
     
     return watermarked_image
@@ -136,7 +136,7 @@ def recover_watermark(original_image: np.ndarray, watermarked_image: np.ndarray,
     sigma_q_recovered = (sigma_w - sigma)/alpha
     Sigma_q_recovered = np.diag(sigma_q_recovered)
     recovered_watermark = U_q @ Sigma_q_recovered @ Vt_q
-    print("recovered_watermark shape:", recovered_watermark.shape)  # Just a check shape
+    # print("recovered_watermark shape:", recovered_watermark.shape)  # Just a check shape
     recovered_watermark = np.clip(recovered_watermark, 0, 1)        # Ensure pixel values are in [0, 1]
 
     return recovered_watermark
