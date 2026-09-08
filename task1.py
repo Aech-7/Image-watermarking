@@ -52,7 +52,18 @@ def svd_decomposition(M: np.ndarray) -> tuple:
                 U (H, k), sigma (k,), Vt (k, W) with k = min(H, W)
             """
 
-    return ...,...,... # comment this line and write your code for the function
+    gram = M@M.T
+    eigenvalues, eigenvectors = np.linalg.eigh(gram) 
+    idx = np.argsort(eigenvalues)[::-1]                 #Gives the indices of the eigenvalues in descending order
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
+    sigma = np.sqrt(np.maximum(eigenvalues, 0))         # MM^T is positive semi-definite, so eigenvalues should be non-negative.A check if there are numerical errors that gives us really small negative eigenvalues, we set them to 0 before taking the square root.
+    print(sigma.shape)                                  #Just a check to see if the shape of sigma is correct
+    print("minimum sigma:", sigma.min())                # To check if we have almost zero singular values
+    U = eigenvectors
+    Vt = U.T @ M / sigma[:, None]                                # Vt = sigma^-1 * U^T * M
+               
+    return U, sigma, Vt                    
 
 def add_watermark_single_channel(cover_image: np.ndarray, watermark: np.ndarray, alpha: float) -> np.ndarray:
     """Add watermark to a given channel of an image
@@ -71,8 +82,14 @@ def add_watermark_single_channel(cover_image: np.ndarray, watermark: np.ndarray,
         np.ndarray
             Watermarked Image
         """
+
+    U, sigma, Vt = svd_decomposition(cover_image)
+    U_q, sigma_q, Vt_q = svd_decomposition(watermark)
+    sigma_tilda = sigma + alpha * sigma_q
+    Sigma_tilda = np.diag(sigma_tilda)
+    watermarked_image = U @ Sigma_tilda @ Vt
+    watermarked_image = np.clip(watermarked_image, 0, 1)  # Ensure pixel values are in [0, 1]
     
-    watermarked_image = np.zeros_like(cover_image) # comment this line and write your code for the function
     return watermarked_image
 
 
