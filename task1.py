@@ -58,7 +58,7 @@ def svd_decomposition(M: np.ndarray) -> tuple:
     eigenvalues = eigenvalues[idx]
     eigenvectors = eigenvectors[:, idx]
     sigma = np.sqrt(np.maximum(eigenvalues, 0))         # MM^T is positive semi-definite, so eigenvalues should be non-negative.A check if there are numerical errors that gives us really small negative eigenvalues, we set them to 0 before taking the square root.
-    print(sigma.shape)                                  #Just a check to see if the shape of sigma is correct
+    print("sigma shape:", sigma.shape)                                  #Just a check to see if the shape of sigma is correct
     print("minimum sigma:", sigma.min())                # To check if we have almost zero singular values
     U = eigenvectors
     Vt = U.T @ M / sigma[:, None]                                # Vt = sigma^-1 * U^T * M
@@ -84,11 +84,12 @@ def add_watermark_single_channel(cover_image: np.ndarray, watermark: np.ndarray,
         """
 
     U, sigma, Vt = svd_decomposition(cover_image)
-    U_q, sigma_q, Vt_q = svd_decomposition(watermark)
-    sigma_tilda = sigma + alpha * sigma_q
-    Sigma_tilda = np.diag(sigma_tilda)
-    watermarked_image = U @ Sigma_tilda @ Vt
-    watermarked_image = np.clip(watermarked_image, 0, 1)  # Ensure pixel values are in [0, 1]
+    _, sigma_q, _ = svd_decomposition(watermark)
+    sigma_w = sigma + alpha * sigma_q                           #Gives vector of singular values of the watermarked image
+    Sigma_w = np.diag(sigma_w)                                  #Makes a diagonal matrix
+    watermarked_image = U @ Sigma_w @ Vt
+    print("watermarked_image shape:", watermarked_image.shape)  # Just a check shape
+    watermarked_image = np.clip(watermarked_image, 0, 1)        # Ensure pixel values are in [0, 1]
     
     return watermarked_image
 
@@ -113,8 +114,15 @@ def recover_watermark(original_image: np.ndarray, watermarked_image: np.ndarray,
             Recovered watermark
         """
 
-    
-    recovered_watermark = np.zeros_like(watermark) # comment this line and write your code for the function
+    _, sigma, _ = svd_decomposition(original_image)                 #Get the singular values of the original image
+    U_q, _, Vt_q = svd_decomposition(watermark)                     #Get U and Vt of the watermark
+    _, sigma_w, _ = svd_decomposition(watermarked_image)            #Get the singular values of the watermarked image
+    sigma_q_recovered = (sigma_w - sigma)/alpha
+    Sigma_q_recovered = np.diag(sigma_q_recovered)
+    recovered_watermark = U_q @ Sigma_q_recovered @ Vt_q
+    print("recovered_watermark shape:", recovered_watermark.shape)  # Just a check shape
+    recovered_watermark = np.clip(recovered_watermark, 0, 1)        # Ensure pixel values are in [0, 1]
+
     return recovered_watermark
 
 
