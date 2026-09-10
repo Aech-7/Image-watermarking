@@ -65,7 +65,14 @@ if __name__ == "__main__":
                 # Apply watermarking, apply JPEG compression, and recover the watermark from the compressed image
                 # ###############################################
                 # Comment below line and write your code here
-                pass
+                watermarked_image = add_watermark_rgb(image, watermark_rgb, alpha)
+                compressed_image = jpg_compression(watermarked_image, quality)
+                recovered_watermark = recover_watermark_rgb(
+                    image, compressed_image, watermark_rgb, alpha
+                )
+
+                watermarked_images_per_alpha.append(compressed_image)
+                recovered_watermarks_per_alpha.append(recovered_watermark)
                 
                 # ###############################################
 
@@ -118,7 +125,14 @@ if __name__ == "__main__":
                 # Compute PSNR between (a) original and watermarked compressed images; (b) original watermark and recovered watermark from the compressed image
                 # ###############################################
                 # Comment below line and write your code here
-                pass
+                compressed_image = watermarked_images_rgb[quality_idx][alpha_idx][image_idx]
+                recovered_watermark = recovered_watermarks_rgb[quality_idx][alpha_idx][image_idx]
+
+                psnr_compressed = compute_psnr(image, compressed_image)
+                psnr_recovered = compute_psnr(watermark_rgb, recovered_watermark)
+
+                noisy_watermarked_psnr_per_image.append(psnr_compressed)
+                recovered_watermark_psnr_per_image.append(psnr_recovered)
                 
                 # ###############################################
 

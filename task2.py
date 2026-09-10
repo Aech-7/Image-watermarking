@@ -32,7 +32,8 @@ def compute_psnr(original: np.ndarray, modified: np.ndarray) -> float:
             PSNR value
         """
 
-    psnr = 0.0 # comment this line and write your code for the function
+    mse = np.mean((original - modified) ** 2)
+    psnr = 20 * np.log10(1.0 / np.sqrt(mse))            #MAX=1.0 since we normalized the images to [0, 1]
     return psnr
 
 
@@ -59,12 +60,11 @@ if __name__ == "__main__":
             watermarked_image_rgb = add_watermark_rgb(images_rgb[i], watermark_rgb, alpha=alpha)
             recovered_rgb = recover_watermark_rgb(images_rgb[i], watermarked_image_rgb, watermark_rgb, alpha=alpha)
 
-            # Compute PSNR between (a) original and watermarked images; (b)original watermark and recovered watermark
-            # ###############################################
-            # Write your code here
-            
-            # ###############################################
+            psnr_w = compute_psnr(images_rgb[i], watermarked_image_rgb)
+            psnr_r = compute_psnr(watermark_rgb, recovered_rgb)
 
+            psnr_watermarked_alpha.append(psnr_w)
+            psnr_recovered_alpha.append(psnr_r)
         psnr_watermarked.append(psnr_watermarked_alpha)
         psnr_recovered.append(psnr_recovered_alpha)
 

@@ -58,7 +58,7 @@ def svd_decomposition(M: np.ndarray) -> tuple:
     eigenvalues = eigenvalues[idx]
     eigenvectors = eigenvectors[:, idx]
     sigma = np.sqrt(np.maximum(eigenvalues, 0))
-    sigma = np.where(sigma <= 1e-9, 0, sigma)          #Replace almost zero singular values with 0
+    sigma = np.where(sigma <= 1e-8, 0, sigma)          #Replace almost zero singular values with 0
     # print("sigma shape:", sigma.shape)                  #Just a check to see if the shape of sigma is correct
     # print("minimum sigma:", sigma.min())                # To check if we have almost zero singular values
     U = eigenvectors                             

@@ -32,7 +32,8 @@ def add_gaussian_noise(image: np.ndarray, stddev: float = 0.01) -> np.ndarray:
             Noisy image
         """
 
-    noisy_image = np.zeros_like(image) # comment this line and write your code for the function
+    noise = np.random.normal(0, stddev, image.shape)            # Noise with mean 0 and given stddev
+    noisy_image = np.clip(image + noise, 0, 1)                  #Add noise to image and clip
     return noisy_image
 
 STDDEV = [0.01, 0.05, 0.1, 0.15]  # Standard deviations for Gaussian noise
@@ -40,6 +41,7 @@ ALPHAS = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
 
 if __name__ == "__main__":
 
+    np.random.seed(0)       #For reproducibility of the results
     image_paths = sorted(glob.glob("imgs/*.jpg"))
     images_rgb = [load_image_as_rgb(path) for path in image_paths]
     watermark_rgb = load_image_as_rgb(os.getenv("watermark_path"))
@@ -64,7 +66,13 @@ if __name__ == "__main__":
                 # Apply watermarking, add Gaussian noise, and recover the watermark from the noisy image
                 # ###############################################
                 # Comment below line and write your code here
-                pass
+                watermarked_image = add_watermark_rgb(image, watermark_rgb, alpha)
+                noisy_image = add_gaussian_noise(watermarked_image, stddev)
+                recovered_watermark = recover_watermark_rgb(
+                    image, noisy_image, watermark_rgb, alpha)
+
+                watermarked_images_per_alpha.append(noisy_image)
+                recovered_watermarks_per_alpha.append(recovered_watermark)
                 
                 # ###############################################
 
@@ -117,7 +125,14 @@ if __name__ == "__main__":
                 # Compute PSNR between (a) original and watermarked noisy images; (b) original watermark and recovered watermark from the noisy image
                 # ###############################################
                 # Comment below line and write your code here
-                pass
+                noisy_image = watermarked_images_rgb[stddev_idx][alpha_idx][image_idx]
+                recovered_watermark = recovered_watermarks_rgb[stddev_idx][alpha_idx][image_idx]
+
+                psnr_noisy = compute_psnr(image, noisy_image)
+                psnr_recovered = compute_psnr(watermark_rgb, recovered_watermark)
+
+                noisy_watermarked_psnr_per_image.append(psnr_noisy)
+                recovered_watermark_psnr_per_image.append(psnr_recovered)
                 
                 # ###############################################
 
