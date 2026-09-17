@@ -74,6 +74,7 @@ $$
 The corresponding eigenvectors are used to construct the singular-vector matrices required for reconstruction.
 
 Small singular values are handled separately to avoid numerical instability.
+
 ---
 
 ## Watermarking Pipeline
@@ -121,7 +122,16 @@ Two PSNR measurements are used:
 * **Original vs. Watermarked Image** — measures distortion introduced into the cover image.
 * **Original vs. Recovered Watermark** — measures watermark recovery quality.
 
-![Effect of watermark strength](results/plots/psnr_vs_alpha.png)
+<table>
+  <tr>
+    <td align="center">
+      <img src="results/baseline/Recovered_img.png" width="450">
+    </td>
+    <td align="center">
+      <img src="results/baseline/psnr_comparison.png" width="900">
+    </td>
+  </tr>
+</table>
 
 Increasing `α` makes the watermark stronger but also introduces more distortion into the cover image. The recovery quality also varies with `α`, showing that the strongest watermark is not necessarily the best one.
 
@@ -137,7 +147,9 @@ Tested noise levels:
 σ = 0.01, 0.05, 0.10, 0.15
 ```
 
-![Gaussian noise robustness](results/plots/noise_robustness.png)
+<p align="center">
+  <img src="results/baseline/psnr_vs_alpha_noise.png" width="800">
+</p>
 
 At the lower noise levels, the watermark remains recoverable for the tested images. At higher noise levels, recovery quality drops significantly and QR decoding fails for the tested watermark strengths.
 
@@ -153,7 +165,9 @@ The watermarked images are compressed using different JPEG quality factors:
 Quality = 90, 70, 50, 30
 ```
 
-![JPEG robustness](results/plots/jpeg_robustness.png)
+<p align="center">
+  <img src="results/baseline/psnr_vs_alpha_compression.png" width="800">
+</p>
 
 JPEG compression reduces the quality of the recovered watermark as the compression becomes stronger.
 
@@ -211,13 +225,13 @@ svd-watermarking/
 │   └── jpeg_robustness.py
 │
 ├── data/
-│   ├── covers/
-│   └── watermark/
+│   ├── imgs/
+│   └── watermark
 │
 └── results/
-    ├── plots/
+    ├── baseline/
     ├── gaussian_noise/
-    └── jpeg/
+    └── jpeg_compression/
 ```
 
 ### Main Files
